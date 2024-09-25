@@ -37,11 +37,20 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 		OriginalURL: linkReq.OriginalURL,
 	}
 
+	err := c.linkRepo.CreateLink(&link)
+	if err != nil {
+		return "", err
+	}
+
 	return c.createShortURL(link.Code), nil
 }
 
-func (c *Controller) GetLink(shortenedURL string) (models.URL, error) {
-	return "originalURL", nil
+func (c *Controller) GetLink(code string) (models.URL, error) {
+	link, err := c.linkRepo.GetLink(code)
+	if err != nil {
+		return "", err
+	}
+	return link.OriginalURL, nil
 }
 
 func (c *Controller) createShortURL(code string) models.URL {
