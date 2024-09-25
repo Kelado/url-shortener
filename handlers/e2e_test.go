@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	controller "github.com/Kelado/url-shortener/controllers"
-	handler "github.com/Kelado/url-shortener/handlers"
 	"github.com/Kelado/url-shortener/repositories"
 	"github.com/go-chi/chi/v5"
 
@@ -32,10 +31,10 @@ func initEnv() {
 	shortURLpattern = fmt.Sprintf("^%s/[a-zA-Z]{%d}$", testHostname, testCodeSize)
 }
 
-func initHandler() *handler.Handler {
+func initHandler() *Handler {
 	linkRepo := repositories.NewMockDB()
 	controller := controller.NewController(testHostname, testCodeSize, linkRepo)
-	return handler.NewHandler(controller)
+	return NewHandler(controller)
 }
 
 func TestPostReturnShortURL(t *testing.T) {
@@ -168,7 +167,7 @@ func TestGetExistingURL(t *testing.T) {
 	assert.Equal(t, expectedURL, redirectToURL.String())
 }
 
-func insertExampleURL(h *handler.Handler, data map[string]interface{}) string {
+func insertExampleURL(h *Handler, data map[string]interface{}) string {
 	reqBody := new(bytes.Buffer)
 	json.NewEncoder(reqBody).Encode(data)
 
