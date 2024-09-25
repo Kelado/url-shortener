@@ -15,8 +15,8 @@ func NewMockDB() *MockDB {
 }
 
 func (db *MockDB) CreateLink(link *models.Link) error {
-	_, ok := db.store[link.Code]
-	if !ok {
+	_, exists := db.store[link.Code]
+	if exists {
 		return ErrCodeAlreadyExists
 	}
 	db.store[link.Code] = link
