@@ -1,7 +1,7 @@
 SVC_NAME=app
 
-run:
-	go run .
+run: build
+	./bin/$(SVC_NAME)
 
 test: 
 	go clean -testcache
