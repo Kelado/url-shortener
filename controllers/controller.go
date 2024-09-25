@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,6 +8,11 @@ import (
 	"github.com/Kelado/url-shortener/internal/random"
 	"github.com/Kelado/url-shortener/models"
 	"github.com/Kelado/url-shortener/repositories"
+)
+
+var (
+	ErrEmptyURL     = fmt.Errorf("empty url")
+	ErrURLNotExists = fmt.Errorf("url does not exist")
 )
 
 type Controller struct {
@@ -56,12 +60,12 @@ func (c *Controller) GetLink(code string) (models.URL, error) {
 
 func ValidateLink(l *models.Link) error {
 	if l.OriginalURL == "" {
-		return errors.New("url can not be empty")
+		return ErrEmptyURL
 	}
 
 	_, err := http.Head(string(l.OriginalURL))
 	if err != nil {
-		return fmt.Errorf("url does not exists '%s'", string(l.OriginalURL))
+		return ErrURLNotExists
 	}
 
 	return nil
