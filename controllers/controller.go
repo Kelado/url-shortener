@@ -19,18 +19,25 @@ type Controller struct {
 	codeSize int
 	hostname string
 	linkRepo repositories.LinkRepository
+
+	generateCode func() string
 }
 
 func NewController(hostname string, codeSize int, linkRepo repositories.LinkRepository) *Controller {
 	return &Controller{
-		codeSize: codeSize,
-		hostname: hostname,
-		linkRepo: linkRepo,
+		codeSize:     codeSize,
+		hostname:     hostname,
+		linkRepo:     linkRepo,
+		generateCode: func() string { return random.NewString(codeSize) },
 	}
 }
 
+func (c *Controller) WithCodeGenerator(f func() string) {
+	c.generateCode = f
+}
+
 func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) {
-	code := random.NewString(c.codeSize)
+	code := c.generateCode()
 
 	link := models.Link{
 		Code:        code,
@@ -44,7 +51,16 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 
 	err := c.linkRepo.CreateLink(&link)
 	if err != nil {
-		return models.EmptyURL, err
+		switch err {
+		case repositories.ErrCodeAlreadyExists:
+			for err != nil {
+				newCode := c.generateCode()
+				link.Code = newCode
+				err = c.linkRepo.CreateLink(&link)
+			}
+		default:
+			return models.EmptyURL, err
+		}
 	}
 
 	return c.createShortURL(link.Code), nil
