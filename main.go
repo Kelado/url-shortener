@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-	linkRepo := repositories.NewMockDB()
+	linkRepo := repositories.NewSQLiteDB(nil)
 	controller := controller.NewController(Hostname, CodeSize, linkRepo)
 	handler := handler.NewHandler(controller)
 
