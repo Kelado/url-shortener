@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	controller "github.com/Kelado/url-shortener/controllers"
@@ -28,9 +27,17 @@ func (h *Handler) HandlePostURL(w http.ResponseWriter, r *http.Request) {
 	var link models.LinkRequest
 	json.NewDecoder(r.Body).Decode(&link)
 
+	if err := link.ValidateSchema(); err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	shortenedURL, err := h.controller.CreateLink(link)
 	if err != nil {
-		fmt.Println(err)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(err.Error()))
+		return
 	}
 
 	resp := models.LinkResponse{
@@ -46,7 +53,7 @@ func (h *Handler) HandleGetURL(w http.ResponseWriter, r *http.Request) {
 
 	originalURL, err := h.controller.GetLink(code)
 	if err != nil {
-		fmt.Println(err)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
