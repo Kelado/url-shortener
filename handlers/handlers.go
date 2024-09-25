@@ -7,6 +7,7 @@ import (
 
 	controller "github.com/Kelado/url-shortener/controllers"
 	"github.com/Kelado/url-shortener/models"
+	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
@@ -24,7 +25,6 @@ func (h *Handler) HandlePing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlePostURL(w http.ResponseWriter, r *http.Request) {
-	// Get data from post request
 	var link models.LinkRequest
 	json.NewDecoder(r.Body).Decode(&link)
 
@@ -42,5 +42,13 @@ func (h *Handler) HandlePostURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleGetURL(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("http://google.com"))
+	code := chi.URLParam(r, "code")
+
+	originalURL, err := h.controller.GetLink(code)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	http.Redirect(w, r, string(originalURL), http.StatusSeeOther)
 }
