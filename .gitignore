@@ -1,3 +1,6 @@
 bin/
 
 .env
+
+# Ignore every missing db instance from sqlite
+./../*.db
