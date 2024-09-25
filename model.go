@@ -5,10 +5,9 @@ import "time"
 type URL string
 
 type Link struct {
-	ID           string
-	CreatedAt    time.Time
-	ShortenedURL URL
-	OriginalURL  URL
+	Code        string
+	CreatedAt   time.Time
+	OriginalURL URL
 }
 
 type LinkRequest struct {
