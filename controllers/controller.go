@@ -39,12 +39,12 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 	}
 
 	if err := ValidateLink(&link); err != nil {
-		return "", err
+		return models.EmptyURL, err
 	}
 
 	err := c.linkRepo.CreateLink(&link)
 	if err != nil {
-		return "", err
+		return models.EmptyURL, err
 	}
 
 	return c.createShortURL(link.Code), nil
@@ -53,13 +53,13 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 func (c *Controller) GetLink(code string) (models.URL, error) {
 	link, err := c.linkRepo.GetLink(code)
 	if err != nil {
-		return "", err
+		return models.EmptyURL, err
 	}
 	return link.OriginalURL, nil
 }
 
 func ValidateLink(l *models.Link) error {
-	if l.OriginalURL == "" {
+	if l.OriginalURL == models.EmptyURL {
 		return ErrEmptyURL
 	}
 

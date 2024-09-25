@@ -6,6 +6,8 @@ import (
 
 type URL string
 
+const EmptyURL = URL("")
+
 type Link struct {
 	Code        string
 	CreatedAt   time.Time
