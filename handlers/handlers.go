@@ -33,7 +33,12 @@ func (h *Handler) HandlePostURL(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	fmt.Println(shortenedURL)
+	resp := models.LinkResponse{
+		ShortURL: shortenedURL,
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&resp)
 }
 
 func (h *Handler) HandleGetURL(w http.ResponseWriter, r *http.Request) {

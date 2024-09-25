@@ -37,13 +37,13 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 		OriginalURL: linkReq.OriginalURL,
 	}
 
-	return c.createServiceURL(link.Code), nil
+	return c.createShortURL(link.Code), nil
 }
 
 func (c *Controller) GetLink(shortenedURL string) (models.URL, error) {
 	return "originalURL", nil
 }
 
-func (c *Controller) createServiceURL(code string) models.URL {
+func (c *Controller) createShortURL(code string) models.URL {
 	return models.URL(c.hostname + code)
 }
