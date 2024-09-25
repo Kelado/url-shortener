@@ -9,7 +9,7 @@ import (
 )
 
 func newRepository() LinkRepository {
-	return NewMockDB()
+	return NewSQLiteDB(&SQLiteRepoConfig{DSN: ":memory:"})
 }
 
 func TestCreateLink(t *testing.T) {
