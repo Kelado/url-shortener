@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,8 +38,19 @@ func main() {
 	r.Post("/shorten", handler.HandlePostURL)
 	r.Get("/{code}", handler.HandleGetURL)
 
+	server := &http.Server{
+		Addr:    Addr,
+		Handler: r,
+	}
+
+	go activateGracefullShutdown(server)
+
 	log.Println("Listerning on", Addr)
-	http.ListenAndServe(Addr, r)
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		log.Fatalf("HTTP server error: %v", err)
+	}
+
+	log.Println("Grecafull Shutdown")
 }
 
 func init() {
@@ -47,4 +63,17 @@ func init() {
 
 	Addr = ":" + port
 	Hostname = hostname + Addr + "/"
+}
+
+func activateGracefullShutdown(server *http.Server) {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 3*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("HTTP shutdown error: %v", err)
+	}
 }
