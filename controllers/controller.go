@@ -8,12 +8,6 @@ import (
 	"github.com/Kelado/url-shortener/repositories"
 )
 
-const (
-	CodeSize = 6
-
-	Hostname = "http://localhost:8000/"
-)
-
 type Controller struct {
 	codeSize int
 	hostname string
