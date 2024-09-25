@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	controller "github.com/Kelado/url-shortener/controllers"
 	handler "github.com/Kelado/url-shortener/handlers"
 	"github.com/Kelado/url-shortener/repositories"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +49,7 @@ func TestPostReturnShortURL(t *testing.T) {
 	reqBody := new(bytes.Buffer)
 	json.NewEncoder(reqBody).Encode(data)
 
-	req := httptest.NewRequest(http.MethodGet, "/shorten", reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/shorten", reqBody)
 	w := httptest.NewRecorder()
 	h.HandlePostURL(w, req)
 	res := w.Result()
@@ -74,7 +76,7 @@ func TestPostWrongFieldName(t *testing.T) {
 	reqBody := new(bytes.Buffer)
 	json.NewEncoder(reqBody).Encode(data)
 
-	req := httptest.NewRequest(http.MethodGet, "/shorten", reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/shorten", reqBody)
 	w := httptest.NewRecorder()
 	h.HandlePostURL(w, req)
 	res := w.Result()
@@ -99,7 +101,7 @@ func TestPostEmptyURL(t *testing.T) {
 	reqBody := new(bytes.Buffer)
 	json.NewEncoder(reqBody).Encode(data)
 
-	req := httptest.NewRequest(http.MethodGet, "/shorten", reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/shorten", reqBody)
 	w := httptest.NewRecorder()
 	h.HandlePostURL(w, req)
 	res := w.Result()
@@ -124,7 +126,7 @@ func TestPostWrongURL(t *testing.T) {
 	reqBody := new(bytes.Buffer)
 	json.NewEncoder(reqBody).Encode(data)
 
-	req := httptest.NewRequest(http.MethodGet, "/shorten", reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/shorten", reqBody)
 	w := httptest.NewRecorder()
 	h.HandlePostURL(w, req)
 	res := w.Result()
@@ -137,4 +139,51 @@ func TestPostWrongURL(t *testing.T) {
 	msg := string(bodyBytes)
 	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	assert.Equal(t, "url does not exist", msg)
+}
+
+func TestGetExistingURL(t *testing.T) {
+	initEnv()
+	h := initHandler()
+
+	expectedURL := "https://example.com"
+	data := map[string]interface{}{
+		"url": expectedURL,
+	}
+	shortURL := insertExampleURL(h, data)
+	code := getCode(shortURL)
+
+	req := httptest.NewRequest(http.MethodGet, "/{code}", nil)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("code", code)
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+	w := httptest.NewRecorder()
+	h.HandleGetURL(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+
+	assert.Equal(t, http.StatusSeeOther, res.StatusCode)
+
+	redirectToURL, _ := res.Location()
+	assert.Equal(t, expectedURL, redirectToURL.String())
+}
+
+func insertExampleURL(h *handler.Handler, data map[string]interface{}) string {
+	reqBody := new(bytes.Buffer)
+	json.NewEncoder(reqBody).Encode(data)
+
+	req := httptest.NewRequest(http.MethodPost, "/shorten", reqBody)
+	w := httptest.NewRecorder()
+	h.HandlePostURL(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+
+	respData := make(map[string]interface{})
+	json.NewDecoder(res.Body).Decode(&respData)
+
+	return respData["shortUrl"].(string)
+}
+
+func getCode(url string) string {
+	return url[len(url)-testCodeSize:]
 }
