@@ -13,3 +13,7 @@ type Link struct {
 type LinkRequest struct {
 	OriginalURL URL `json:"url"`
 }
+
+type LinkResponse struct {
+	ShortURL URL `json:"shortUrl"`
+}
