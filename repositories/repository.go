@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("not found")
+	ErrNotFound          = errors.New("not found")
+	ErrCodeAlreadyExists = errors.New("code already exists")
 )
 
 type LinkRepository interface {
