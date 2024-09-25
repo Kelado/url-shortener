@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/Kelado/url-shortener/internal/random"
@@ -31,6 +34,10 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 		OriginalURL: linkReq.OriginalURL,
 	}
 
+	if err := ValidateLink(&link); err != nil {
+		return "", err
+	}
+
 	err := c.linkRepo.CreateLink(&link)
 	if err != nil {
 		return "", err
@@ -45,6 +52,19 @@ func (c *Controller) GetLink(code string) (models.URL, error) {
 		return "", err
 	}
 	return link.OriginalURL, nil
+}
+
+func ValidateLink(l *models.Link) error {
+	if l.OriginalURL == "" {
+		return errors.New("url can not be empty")
+	}
+
+	_, err := http.Head(string(l.OriginalURL))
+	if err != nil {
+		return fmt.Errorf("url does not exists '%s'", string(l.OriginalURL))
+	}
+
+	return nil
 }
 
 func (c *Controller) createShortURL(code string) models.URL {
