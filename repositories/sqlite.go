@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultDSN = "file:devices.db?cache=shared&mode=rwc"
+	defaultDSN = "file:link.db?cache=shared&mode=rwc"
 )
 
 type SQLiteRepoConfig struct {
