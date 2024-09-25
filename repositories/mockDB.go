@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"errors"
-
 	"github.com/Kelado/url-shortener/models"
 )
 
@@ -24,7 +22,7 @@ func (db *MockDB) CreateLink(link *models.Link) error {
 func (db *MockDB) GetLink(code string) (*models.Link, error) {
 	link, ok := db.store[code]
 	if !ok {
-		return nil, errors.New("not found")
+		return nil, ErrNotFound
 	}
 	return link, nil
 }

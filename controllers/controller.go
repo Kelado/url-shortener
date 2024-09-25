@@ -35,7 +35,7 @@ func (c *Controller) CreateLink(linkReq models.LinkRequest) (models.URL, error) 
 	link := models.Link{
 		Code:        code,
 		CreatedAt:   time.Now(),
-		OriginalURL: linkReq.OriginalURL,
+		OriginalURL: *linkReq.OriginalURL,
 	}
 
 	if err := ValidateLink(&link); err != nil {
