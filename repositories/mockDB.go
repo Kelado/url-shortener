@@ -1,21 +1,30 @@
 package repositories
 
-import "github.com/Kelado/url-shortener/models"
+import (
+	"errors"
+
+	"github.com/Kelado/url-shortener/models"
+)
 
 type MockDB struct {
-	store map[string]models.Link
+	store map[string]*models.Link
 }
 
 func NewMockDB() *MockDB {
 	return &MockDB{
-		store: make(map[string]models.Link),
+		store: make(map[string]*models.Link),
 	}
 }
 
 func (db *MockDB) CreateLink(link *models.Link) error {
+	db.store[link.Code] = link
 	return nil
 }
 
 func (db *MockDB) GetLink(code string) (*models.Link, error) {
-	return &models.Link{}, nil
+	link, ok := db.store[code]
+	if !ok {
+		return nil, errors.New("not found")
+	}
+	return link, nil
 }
