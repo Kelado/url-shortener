@@ -27,7 +27,7 @@ func main() {
 	r.Get("/ping", handler.HandlePing)
 
 	r.Post("/shorten", handler.HandlePostURL)
-	r.Get("/:shortUrl", handler.HandleGetURL)
+	r.Get("/:code", handler.HandleGetURL)
 
 	http.ListenAndServe(Addr, r)
 }
