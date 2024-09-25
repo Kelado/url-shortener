@@ -3,7 +3,6 @@ package repositories
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -54,7 +53,7 @@ func (db *SQLite) CreateLink(link *models.Link) error {
 }
 
 func (db *SQLite) GetLink(code string) (*models.Link, error) {
-	row := db.db.QueryRow(`SELECT code, created_at, original_url FROM links WHERE code = ?`, code)
+	row := db.db.QueryRow(`SELECT * FROM links WHERE code = ?`, code)
 
 	var link models.Link
 	err := row.Scan(&link.Code, &link.CreatedAt, &link.OriginalURL)
@@ -78,8 +77,4 @@ func initTables(db *sql.DB) error {
 	}
 
 	return nil
-}
-
-func (db *SQLite) Drop() {
-	os.Remove("./db.db")
 }
